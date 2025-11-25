@@ -5,7 +5,7 @@ SHAP-based explanations and regulator-style model cards.
 It is designed for applications like multi-omics, radiomics + clinical data,
 and other multi-view biomedical datasets.
 
-# Features: 
+# Features 
 1. Treats each data modality as a named block
 (e.g. clinical_block, omics_block, radiomics_block).
 2. Works with any scikit-learn style classifier
@@ -14,10 +14,10 @@ and other multi-view biomedical datasets.
 4. Automatic model card generation for internal review, audits or papers.
 5. Simple API that plays nicely with pandas and Jupyter notebooks.
 
-# Installation: 
+# Installation:
 pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git
 
-# Quickstart: 
+# Quickstart
 import pandas as pd
 from muse_xai import MUSE
 
@@ -60,7 +60,7 @@ card = muse.generate_model_card(
     task_description="Binary classification of breast masses (benign vs malignant).",
 )
 
-# Example notebooks: 
+# Example notebooks
 The examples/ folder contains notebooks that reproduce the main use-cases
 described in the paper:
 1. wdbc_demo.ipynb: morphological breast cancer features split into mean / SE / worst blocks.
@@ -71,7 +71,7 @@ Each notebook shows:
 2. how to build the blocks dictionary,
 3. how to run MUSE, visualise SHAP plots, and generate a model card.
 
-# Project structure: 
+# Project structure
 MUSE-multi-block-xai/
   src/muse_xai/
     __init__.py
@@ -87,5 +87,5 @@ MUSE-multi-block-xai/
   pyproject.toml
   paper.md
 
-# License:
+# License
 MUSE is released under the MIT License. See LICENSE for details.
