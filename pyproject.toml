@@ -1,1 +1,36 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "muse-xai"
+version = "0.1.0"
+description = "MUSE – Multi-block Utility for Safe & Explainable learning"
+authors = [
+  { name = "YOUR NAME", email = "you@example.com" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+keywords = ["machine learning", "explainable AI", "multi-omics", "radiomics", "healthcare"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=1.5",
+  "scikit-learn>=1.4",
+  "matplotlib>=3.8",
+  "shap>=0.45",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
