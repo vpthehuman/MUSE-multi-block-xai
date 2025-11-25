@@ -1,36 +1,23 @@
-# MUSE – Multi-block Utility for Safe & Explainable learning
+MUSE – Multi-block Utility for Safe & Explainable learning
 
-MUSE is a small Python library for **block-structured tabular ML** with
-**SHAP-based explanations** and **regulator-style model cards**.
-
+MUSE is a small Python library for block-structured tabular ML with
+SHAP-based explanations and regulator-style model cards.
 It is designed for applications like multi-omics, radiomics + clinical data,
 and other multi-view biomedical datasets.
 
----
+Features: 
+1. Treats each data modality as a named block
+(e.g. clinical_block, omics_block, radiomics_block).
+2. Works with any scikit-learn style classifier
+(RandomForest by default, but you can plug in your own model).
+3. Global and local SHAP explanations with aggregation at block level.
+4. Automatic model card generation for internal review, audits or papers.
+5. Simple API that plays nicely with pandas and Jupyter notebooks.
 
-## Features
-
-- Treats each data modality as a named **block**  
-  (e.g. `clinical_block`, `omics_block`, `radiomics_block`).
-- Works with any scikit-learn style classifier  
-  (RandomForest by default, but you can plug in your own model).
-- Global and local **SHAP** explanations with aggregation at **block level**.
-- Automatic **model card** generation for internal review, audits or papers.
-- Simple API that plays nicely with **pandas** and **Jupyter notebooks**.
-
----
-
-## Installation
-
-For now, install directly from GitHub:
-
-```bash
+Installation: 
 pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git
 
----
-
-## Quickstart
-```python
+Quickstart: 
 import pandas as pd
 from muse_xai import MUSE
 
@@ -52,7 +39,11 @@ muse = MUSE(random_state=42)
 
 # Fit and evaluate
 muse.fit(blocks_train, y_train)
-metrics = muse.evaluate(blocks_test, y_test, target_names=("benign", "malignant"))
+metrics = muse.evaluate(
+    blocks_test,
+    y_test,
+    target_names=("benign", "malignant"),
+)
 print(metrics)
 
 # Global explanations (returns feature + block importance and shows a plot)
@@ -69,13 +60,10 @@ card = muse.generate_model_card(
     task_description="Binary classification of breast masses (benign vs malignant).",
 )
 
----
-
-## Example notebooks
-```python
+Example notebooks: 
 The examples/ folder contains notebooks that reproduce the main use-cases
 described in the paper:
-1. wdbc_demo.ipynb: Morphological breast cancer features split into mean / SE / worst blocks.
+1. wdbc_demo.ipynb: morphological breast cancer features split into mean / SE / worst blocks.
 2. cbis_mass_demo.ipynb: CBIS-DDSM MASS case descriptions with a clinical block and a descriptor block.
 3. wawtace_demo.ipynb: WAW-TACE hepatocellular carcinoma dataset with clinical and CT radiomics blocks.
 Each notebook shows:
@@ -83,10 +71,7 @@ Each notebook shows:
 2. how to build the blocks dictionary,
 3. how to run MUSE, visualise SHAP plots, and generate a model card.
 
----
-
-## Project structure
-```python
+Project structure: 
 MUSE-multi-block-xai/
   src/muse_xai/
     __init__.py
@@ -101,10 +86,7 @@ MUSE-multi-block-xai/
   LICENSE
   pyproject.toml
   paper.md
+  paper.bib
 
----
-
-## License
-```python
+License:
 MUSE is released under the MIT License. See LICENSE for details.
----
