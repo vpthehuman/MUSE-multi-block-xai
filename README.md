@@ -76,6 +76,8 @@ Each notebook shows:
 3. how to run MUSE, visualise SHAP plots, and generate a model card.
 
 # Project structure
+
+```text
 MUSE-multi-block-xai/
   src/muse_xai/
     __init__.py
@@ -90,6 +92,8 @@ MUSE-multi-block-xai/
   LICENSE
   pyproject.toml
   paper.md
+  paper.bib
+```
 
 # License
 MUSE is released under the MIT License. See LICENSE for details.
