@@ -6,15 +6,95 @@ MUSE is a small Python library for **block-structured tabular ML** with
 It is designed for applications like multi-omics, radiomics + clinical data,
 and other multi-view biomedical datasets.
 
+---
+
 ## Features
 
-- Treats each data modality as a named **block** (e.g. `clinical_block`,
-  `omics_block`, `radiomics_block`).
-- Works with any scikit-learn style classifier (RandomForest by default).
-- Global and local **SHAP** explanations with aggregation at block level.
-- Simple API that plays nicely with pandas and Jupyter.
+- Treats each data modality as a named **block**  
+  (e.g. `clinical_block`, `omics_block`, `radiomics_block`).
+- Works with any scikit-learn style classifier  
+  (RandomForest by default, but you can plug in your own model).
+- Global and local **SHAP** explanations with aggregation at **block level**.
+- Automatic **model card** generation for internal review, audits or papers.
+- Simple API that plays nicely with **pandas** and **Jupyter notebooks**.
+
+---
 
 ## Installation
 
+For now, install directly from GitHub:
+
 ```bash
-pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git 
+pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git
+
+--- 
+## Quickstart
+import pandas as pd
+from muse_xai import MUSE
+
+# Example: two blocks of features
+blocks_train = {
+    "clinical_block": X_clin_train,    # pandas DataFrame (n_samples, p1)
+    "omics_block": X_omics_train,      # pandas DataFrame (n_samples, p2)
+}
+blocks_test = {
+    "clinical_block": X_clin_test,
+    "omics_block": X_omics_test,
+}
+
+y_train = y_train_series   # 0/1 labels
+y_test = y_test_series
+
+# Initialise MUSE (RandomForest backend by default)
+muse = MUSE(random_state=42)
+
+# Fit and evaluate
+muse.fit(blocks_train, y_train)
+metrics = muse.evaluate(blocks_test, y_test, target_names=("benign", "malignant"))
+print(metrics)
+
+# Global explanations (returns feature + block importance and shows a plot)
+feat_imp, block_imp = muse.explain_global(blocks_train)
+
+# Local explanation for a single sample
+sample_idx = blocks_test["clinical_block"].index[0]
+local_exp = muse.explain_local(blocks_test, sample_idx)
+
+# Model card as a Python dict
+card = muse.generate_model_card(
+    dataset_name="Wisconsin Diagnostic Breast Cancer (WDBC)",
+    dataset_reference="UCI Machine Learning Repository",
+    task_description="Binary classification of breast masses (benign vs malignant).",
+)
+
+## Example notebooks
+The examples/ folder contains notebooks that reproduce the main use-cases
+described in the paper:
+1. wdbc_demo.ipynb: Morphological breast cancer features split into mean / SE / worst blocks.
+2. cbis_mass_demo.ipynb: CBIS-DDSM MASS case descriptions with a clinical block and a descriptor block.
+3. wawtace_demo.ipynb: WAW-TACE hepatocellular carcinoma dataset with clinical and CT radiomics blocks.
+Each notebook shows:
+1. how to load the public dataset,
+2. how to build the blocks dictionary,
+3. how to run MUSE, visualise SHAP plots, and generate a model card.
+
+## Project structure
+
+MUSE-multi-block-xai/
+  src/muse_xai/
+    __init__.py
+    core.py
+  tests/
+    test_muse_synthetic.py
+  examples/
+    wdbc_demo.ipynb
+    cbis_mass_demo.ipynb
+    wawtace_demo.ipynb
+  README.md
+  LICENSE
+  pyproject.toml
+  paper.md
+  paper.bib
+
+## License
+MUSE is released under the MIT License. See LICENSE for details.
