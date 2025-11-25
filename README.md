@@ -65,11 +65,11 @@ card = muse.generate_model_card(
 ```
 
 # Example notebooks
-The examples/ folder contains notebooks that reproduce the main use-cases
+The examples/ folder contains python templates that reproduce the main use-cases
 described in the paper:
-1. wdbc_demo.ipynb: morphological breast cancer features split into mean / SE / worst blocks.
-2. cbis_mass_demo.ipynb: CBIS-DDSM MASS case descriptions with a clinical block and a descriptor block.
-3. wawtace_demo.ipynb: WAW-TACE hepatocellular carcinoma dataset with clinical and CT radiomics blocks.
+1. wdbc_demo.py: morphological breast cancer features split into mean / SE / worst blocks.
+2. cbis_mass_demo.py: CBIS-DDSM MASS case descriptions with a clinical block and a descriptor block.
+3. wawtace_demo.py: WAW-TACE hepatocellular carcinoma dataset with clinical and CT radiomics blocks.
 
 Each notebook shows:
 1. how to load the public dataset,
@@ -86,9 +86,9 @@ MUSE-multi-block-xai/
   tests/
     test_muse_synthetic.py
   examples/
-    wdbc_demo.ipynb
-    cbis_mass_demo.ipynb
-    wawtace_demo.ipynb
+    wdbc_demo.py
+    cbis_mass_demo.py
+    wawtace_demo.py
   README.md
   LICENSE
   pyproject.toml
