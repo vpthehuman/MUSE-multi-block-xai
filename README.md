@@ -18,10 +18,12 @@ and other multi-view biomedical datasets.
 pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git
 
 # Quickstart
+
+```python
 import pandas as pd
 from muse_xai import MUSE
 
-#Example: two blocks of features
+# Example: two blocks of features
 blocks_train = {
     "clinical_block": X_clin_train,    # pandas DataFrame (n_samples, p1)
     "omics_block": X_omics_train,      # pandas DataFrame (n_samples, p2)
@@ -34,10 +36,10 @@ blocks_test = {
 y_train = y_train_series   # 0/1 labels
 y_test = y_test_series
 
-#Initialise MUSE (RandomForest backend by default)
+# Initialise MUSE (RandomForest backend by default)
 muse = MUSE(random_state=42)
 
-#Fit and evaluate
+# Fit and evaluate
 muse.fit(blocks_train, y_train)
 metrics = muse.evaluate(
     blocks_test,
@@ -46,19 +48,21 @@ metrics = muse.evaluate(
 )
 print(metrics)
 
-#Global explanations (returns feature + block importance and shows a plot)
+# Global explanations (returns feature + block importance and shows a plot)
 feat_imp, block_imp = muse.explain_global(blocks_train)
 
-#Local explanation for a single sample
+# Local explanation for a single sample
 sample_idx = blocks_test["clinical_block"].index[0]
 local_exp = muse.explain_local(blocks_test, sample_idx)
 
-#Model card as a Python dict
+# Model card as a Python dict
 card = muse.generate_model_card(
     dataset_name="Wisconsin Diagnostic Breast Cancer (WDBC)",
     dataset_reference="UCI Machine Learning Repository",
     task_description="Binary classification of breast masses (benign vs malignant).",
 )
+
+```
 
 # Example notebooks
 The examples/ folder contains notebooks that reproduce the main use-cases
