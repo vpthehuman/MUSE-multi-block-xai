@@ -27,8 +27,10 @@ For now, install directly from GitHub:
 ```bash
 pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git
 
---- 
+---
+
 ## Quickstart
+```python
 import pandas as pd
 from muse_xai import MUSE
 
@@ -67,7 +69,10 @@ card = muse.generate_model_card(
     task_description="Binary classification of breast masses (benign vs malignant).",
 )
 
+---
+
 ## Example notebooks
+```python
 The examples/ folder contains notebooks that reproduce the main use-cases
 described in the paper:
 1. wdbc_demo.ipynb: Morphological breast cancer features split into mean / SE / worst blocks.
@@ -78,8 +83,10 @@ Each notebook shows:
 2. how to build the blocks dictionary,
 3. how to run MUSE, visualise SHAP plots, and generate a model card.
 
-## Project structure
+---
 
+## Project structure
+```python
 MUSE-multi-block-xai/
   src/muse_xai/
     __init__.py
@@ -94,7 +101,10 @@ MUSE-multi-block-xai/
   LICENSE
   pyproject.toml
   paper.md
-  paper.bib
+
+---
 
 ## License
+```python
 MUSE is released under the MIT License. See LICENSE for details.
+---
