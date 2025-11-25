@@ -18,15 +18,14 @@ and other multi-view biomedical datasets.
 pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git
 
 # Quickstart
-
 ```python
 import pandas as pd
 from muse_xai import MUSE
 
 # Example: two blocks of features
 blocks_train = {
-    "clinical_block": X_clin_train,    # pandas DataFrame (n_samples, p1)
-    "omics_block": X_omics_train,      # pandas DataFrame (n_samples, p2)
+    "clinical_block": X_clin_train,   # pandas DataFrame (n_samples, p1)
+    "omics_block": X_omics_train,     # pandas DataFrame (n_samples, p2)
 }
 blocks_test = {
     "clinical_block": X_clin_test,
@@ -41,11 +40,7 @@ muse = MUSE(random_state=42)
 
 # Fit and evaluate
 muse.fit(blocks_train, y_train)
-metrics = muse.evaluate(
-    blocks_test,
-    y_test,
-    target_names=("benign", "malignant"),
-)
+metrics = muse.evaluate(blocks_test, y_test, target_names=("benign", "malignant"))
 print(metrics)
 
 # Global explanations (returns feature + block importance and shows a plot)
@@ -61,6 +56,7 @@ card = muse.generate_model_card(
     dataset_reference="UCI Machine Learning Repository",
     task_description="Binary classification of breast masses (benign vs malignant).",
 )
+
 
 ```
 
