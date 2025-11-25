@@ -92,7 +92,6 @@ MUSE-multi-block-xai/
   LICENSE
   pyproject.toml
   paper.md
-  paper.bib
 ```
 
 # License
