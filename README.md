@@ -70,6 +70,7 @@ described in the paper:
 1. wdbc_demo.ipynb: morphological breast cancer features split into mean / SE / worst blocks.
 2. cbis_mass_demo.ipynb: CBIS-DDSM MASS case descriptions with a clinical block and a descriptor block.
 3. wawtace_demo.ipynb: WAW-TACE hepatocellular carcinoma dataset with clinical and CT radiomics blocks.
+
 Each notebook shows:
 1. how to load the public dataset,
 2. how to build the blocks dictionary,
