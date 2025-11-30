@@ -5,52 +5,6 @@ SHAP-based explanations and regulator-style model cards.
 It is designed for applications like multi-omics, radiomics + clinical data,
 and other multi-view biomedical datasets.
 
-```mermaid
-flowchart LR
-    subgraph DATA[Input data]
-        A1[Clinical tables\n(e.g. CSV, Excel)]
-        A2[Omics / radiomics features\n(e.g. WDBC, CBIS-DDSM-R, WAW-TACE)]
-    end
-
-    subgraph BLOCKS[Block construction]
-        B1[Preprocessing\n(cleaning, encoding)]
-        B2[Build blocks dict\n{clinical_block, omics_block, radiomics_block}]
-    end
-
-    subgraph CORE[MUSE multi-block core]
-        C1[Align & concatenate\nblocks → design matrix X]
-        C2[Train sklearn estimator\n(Random Forest / GBM / Logistic / NN)]
-        C3[Evaluate\n(accuracy, ROC AUC, F1, AP)]
-    end
-
-    subgraph XAI[Explainability & aggregation]
-        D1[Compute SHAP values\n(global + local)]
-        D2[Feature-level importance\n(mean |SHAP| per feature)]
-        D3[Block-level importance\naggregate SHAP per block]
-    end
-
-    subgraph REPORT[Reporting & outputs]
-        E1[Model card\n(intended use, data,\nmetrics, explanations, limitations)]
-        E2[Figures & tables\n(SHAP plots,\nblock importance, examples)]
-        E3[Trained model\nfor reuse]
-    end
-
-    A1 --> B1
-    A2 --> B1
-    B1 --> B2
-    B2 --> C1
-    C1 --> C2
-    C2 --> C3
-    C2 --> D1
-    D1 --> D2
-    D1 --> D3
-    C3 --> E1
-    D2 --> E1
-    D3 --> E1
-    E1 --> E2
-    C2 --> E3
-
-
 # Features 
 1. Treats each data modality as a named block
 (e.g. clinical_block, omics_block, radiomics_block).
