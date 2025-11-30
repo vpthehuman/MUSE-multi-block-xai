@@ -5,25 +5,6 @@ SHAP-based explanations and regulator-style model cards.
 It is designed for applications like multi-omics, radiomics + clinical data,
 and other multi-view biomedical datasets.
 
-flowchart LR
-    A[Clinical tables] --> B[Preprocess and encode features]
-    D[Omics feature tables] --> B
-    E[Radiomics feature tables] --> B
-
-    B --> C[Build blocks dictionary {clinical_block, omics_block, radiomics_block}]
-    C --> F[Align samples and concatenate blocks into design matrix X]
-    F --> G[Train sklearn estimator (RandomForest, GBM, Logistic, NN)]
-    G --> H[Evaluate metrics: accuracy, ROC AUC, F1, AP]
-
-    G --> I[Compute SHAP values on background data]
-    I --> J[Global explanations: feature level importance]
-    I --> K[Local explanations: per sample contributions]
-    J --> L[Block level aggregation: sum importance within each block]
-
-    H --> M[Model card: model overview, data, metrics]
-    L --> M
-    K --> M
-
 # Features 
 1. Treats each data modality as a named block
 (e.g. clinical_block, omics_block, radiomics_block).
