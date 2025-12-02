@@ -1,19 +1,21 @@
 # MUSE – Multi-block Utility for Safe & Explainable learning
 
-MUSE is a small Python library for block-structured tabular ML with
-SHAP-based explanations and regulator-style model cards.
-It is designed for applications like multi-omics, radiomics + clinical data,
-and other multi-view biomedical datasets.
+MUSE is a lightweight Python toolkit for building transparent, reproducible machine-learning models on block-structured tabular data—common in multi-omics, radiomics + clinical, and other multi-view biomedical datasets.
+The library treats each data modality as a separate block, trains any scikit-learn-style estimator, produces global + local SHAP explanations, aggregates importances at the block level, and automatically generates regulator-aligned model cards.
 
 
 # Features 
-1. Treats each data modality as a named block
-(e.g. clinical_block, omics_block, radiomics_block).
-2. Works with any scikit-learn style classifier
-(RandomForest by default, but you can plug in your own model).
-3. Global and local SHAP explanations with aggregation at block level.
-4. Automatic model card generation for internal review, audits or papers.
-5. Simple API that plays nicely with pandas and Jupyter notebooks.
+1. Native support for named blocks
+(e.g., "clinical_block", "omics_block", "radiomics_block").
+2. Works with any scikit-learn classifier
+(defaults to balanced Random Forests, but users can plug in any estimator).
+3. Explainability built-in
+- TreeSHAP-based global & local explanations
+- Automatic block-level aggregation for multi-modality interpretation
+4. Automatic model cards
+Summaries for internal review, audits, reproducibility, and publications.
+5. Simple, clean API
+Fully compatible with pandas, scikit-learn, and Jupyter workflows.
 
 # Installation:
 pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git
@@ -23,75 +25,75 @@ pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git
 import pandas as pd
 from muse_xai import MUSE
 
-# Example: two blocks of features
+# Example blocks
 blocks_train = {
-    "clinical_block": X_clin_train,   # pandas DataFrame (n_samples, p1)
-    "omics_block": X_omics_train,     # pandas DataFrame (n_samples, p2)
+    "clinical_block": X_clin_train,
+    "omics_block": X_omics_train,
 }
 blocks_test = {
     "clinical_block": X_clin_test,
     "omics_block": X_omics_test,
 }
 
-y_train = y_train_series   # 0/1 labels
+y_train = y_train_series
 y_test = y_test_series
 
 # Initialise MUSE (RandomForest backend by default)
 muse = MUSE(random_state=42)
 
-# Fit and evaluate
+# Train and evaluate
 muse.fit(blocks_train, y_train)
 metrics = muse.evaluate(blocks_test, y_test, target_names=("benign", "malignant"))
 print(metrics)
 
-# Global explanations (returns feature + block importance and shows a plot)
+# SHAP-based global explanation
 feat_imp, block_imp = muse.explain_global(blocks_train)
 
-# Local explanation for a single sample
+# Local SHAP explanation for a single sample
 sample_idx = blocks_test["clinical_block"].index[0]
 local_exp = muse.explain_local(blocks_test, sample_idx)
 
-# Model card as a Python dict
+# Model card
 card = muse.generate_model_card(
     dataset_name="Wisconsin Diagnostic Breast Cancer (WDBC)",
     dataset_reference="UCI Machine Learning Repository",
     task_description="Binary classification of breast masses (benign vs malignant).",
 )
 
-
 ```
 ## Quick demo (fast, synthetic data)
 
-We provide a tiny synthetic dataset and a convenience script so users can run the three example demos quickly without downloading large public datasets. Create the synthetic data and run the demos:
+MUSE includes a reproducible synthetic dataset so users and reviewers can run demonstrations without downloading large datasets.
 ```bash
-# install dependencies first (preferably in venv)
+# Install dependencies
 pip install -e .
-pip install -r requirements-dev.txt  # if you provide dev deps (pytest, nbconvert)
+pip install -r requirements/requirements-dev.txt   # optional: tests, notebooks
 
-# generate toy data and run quick demos
+# Generate synthetic demo data
 python scripts/make_sample_data.py
+
+# Run three quick example demos
 ./run_quick_demo.sh
 ```
 
 # Example notebooks
-The examples/ folder contains python templates that reproduce the main use-cases
-described in the paper:
-1. wdbc_demo.py: morphological breast cancer features split into mean / SE / worst blocks.
-2. cbis_mass_demo.py: CBIS-DDSM MASS case descriptions with a clinical block and a descriptor block.
-3. wawtace_demo.py: WAW-TACE hepatocellular carcinoma dataset with clinical and CT radiomics blocks.
+Example scripts (Python templates) are available in examples/:
+1. wdbc_demo.py: WDBC breast cancer dataset split into mean, se, and worst blocks.
+2. cbis_mass_demo.py: CBIS-DDSM mass case-descriptions with clinical + descriptor blocks.
+3. wawtace_demo.py: WAW-TACE liver cancer dataset integrating clinical + CT radiomics.
 
 Each notebook shows:
-1. how to load the public dataset,
-2. how to build the blocks dictionary,
-3. how to run MUSE, visualise SHAP plots, and generate a model card.
+✔ How to load data
+✔ How to construct modality blocks
+✔ How to run MUSE (fit → evaluate → explain → model card)
+✔ How to visualise SHAP outputs
 
 ## Citation & DOI
 
 If you use MUSE in your work, please cite:
-
-Chua M., Vishnupriya K., Lee K. (2025). *MUSE: Multi-block Utility for Safe & Explainable Learning*. Zenodo. DOI: [10.5281/zenodo.17793183](https://doi.org/10.5281/zenodo.17793183)
-
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17793183.svg)](https://doi.org/10.5281/zenodo.17793183)
+Chua M., Vishnupriya K., Lee K. (2025).
+MUSE: Multi-block Utility for Safe & Explainable Learning. Zenodo.
+DOI: 10.5281/zenodo.17793183 
 
 
 # Project structure
@@ -110,13 +112,18 @@ MUSE-multi-block-xai/
     wdbc_demo.py
     cbis_mass_demo.py
     wawtace_demo.py
-  README.md
-  LICENSE
-  pyproject.toml
-  model_architecture.png
+  requirements/
+    requirements.txt
+    requirements-dev.txt
+  workflows/
+    tests.yml
   paper/
     paper.md
     paper.bib
+  model_architecture.png
+  README.md
+  LICENSE
+  pyproject.toml
 ```
 
 # License
