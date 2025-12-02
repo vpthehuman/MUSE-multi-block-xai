@@ -33,4 +33,4 @@ jobs:
         with:
           journal: joss
           paper-path: "paper/paper.md"
-          args: "paper/paper.bib"
+          bib: "paper/paper.bib"
