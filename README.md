@@ -89,6 +89,7 @@ MUSE-multi-block-xai/
   README.md
   LICENSE
   pyproject.toml
+  model_architecture.png
   paper.md
   paper.bib
 ```
