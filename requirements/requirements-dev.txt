@@ -1,6 +1,3 @@
-pytest>=7.0
-nbconvert>=7.0
-black  # optional but recommended
-isort
-importlib-metadata; python_version<"3.8"
-
+pytest
+pandocfilters
+pyyaml
