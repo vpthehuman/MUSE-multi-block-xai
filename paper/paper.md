@@ -77,8 +77,6 @@ MUSE includes unit tests that verify block alignment, feature→block mapping, S
 - Dependencies: See `requirements/requirements.txt` for core runtime dependencies and `requirements/requirements-dev.txt` for development and testing.
 - Reproducibility: Example notebooks and the `run_quick_demo.sh` script include `random_state=42` seeds. Each generated model card includes exact environment versions (python, numpy, pandas, scikit-learn, shap, matplotlib) and the package version for reproducibility.
 
-Reproducibility: All example notebooks fix deterministic seeds (random_state=42 throughout), use explicit train/test splits, and record complete dependency version numbers in the auto-generated model card (Python version, library versions, estimator parameters). Instructions to rerun all examples are provided in the repository README.md and in each notebook, ensuring that reviewers and users can reproduce results identically.
-
 # Acknowledgements
 We thank the maintainers of scikit-learn, SHAP, pandas, and NumPy for foundational tools. We acknowledge the UCI Machine Learning Repository and The Cancer Imaging Archive for WDBC and CBIS-DDSM datasets [@wolberg1993wdbc; @Lee2017]. We gratefully acknowledge colleagues and lab members for feedback on design and examples.
 
