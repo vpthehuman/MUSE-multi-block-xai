@@ -12,10 +12,8 @@ The library treats each data modality as a separate block, trains any scikit-lea
 3. Explainability built-in
 - TreeSHAP-based global & local explanations
 - Automatic block-level aggregation for multi-modality interpretation
-4. Automatic model cards
-Summaries for internal review, audits, reproducibility, and publications.
-5. Simple, clean API
-Fully compatible with pandas, scikit-learn, and Jupyter workflows.
+4. Automatic model cards: summaries for internal review, audits, reproducibility, and publications.
+5. Simple, clean API: fully compatible with pandas, scikit-learn, and Jupyter workflows.
 
 # Installation:
 pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git
