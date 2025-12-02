@@ -2,11 +2,9 @@ name: JOSS draft PDF
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -23,15 +21,31 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install system deps (texlive for PDF)
+      - name: Install system deps (texlive)
         run: |
           sudo apt-get update -y
           sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-latex-extra lmodern
 
-      - name: Run openjournals draft action
-        uses: openjournals/openjournals-draft-action@v1
+      - name: Install Python deps (pandoc filters)
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandocfilters pyyaml
+
+      - name: Build JOSS draft (inara)
+        uses: openjournals/inara@v1
         with:
-          paper-path: paper/paper.md
-          bib-path: paper/paper.bib
-          out-dir: artifacts
-        # no token input required for public repos; if you want private artifact uploads, add GITHUB_TOKEN
+          journal: joss
+          root: .
+          paper: paper/paper.md
+          bib: paper/paper.bib
+          out: artifacts
+
+      - name: List artifacts folder
+        run: ls -la artifacts || true
+
+      - name: Upload PDF artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: joss-paper-pdf
+          path: artifacts/*.pdf
