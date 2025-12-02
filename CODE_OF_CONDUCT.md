@@ -2,7 +2,7 @@
 ---
 
 
-```markdown
+```
 # Contributor Covenant Code of Conduct (v2.1)
 
 ## Our Pledge
@@ -21,7 +21,7 @@ Unacceptable behavior includes:
 - Sustained disruption of project work.
 
 ## Enforcement
-Instances of abusive behavior can be reported by contacting the project maintainers at: **vishish123@gmail.com** (replace with your preferred contact email). Reports will be handled confidentially.
+Instances of abusive behavior can be reported by contacting the project maintainers at: vishish123@gmail.com. Reports will be handled confidentially.
 
 ## Attribution
 This Code of Conduct is adapted from the Contributor Covenant v2.1 (https://www.contributor-covenant.org/version/2/1/).
