@@ -32,5 +32,5 @@ jobs:
         uses: openjournals/openjournals-draft-action@v1.0
         with:
           journal: joss
-          paper: paper/paper.md
-          bib: paper/paper.bib
+          paper-path: "paper/paper.md"
+          args: "paper/paper.bib"
