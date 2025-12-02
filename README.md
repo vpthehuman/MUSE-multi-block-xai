@@ -85,6 +85,15 @@ Each notebook shows:
 2. how to build the blocks dictionary,
 3. how to run MUSE, visualise SHAP plots, and generate a model card.
 
+## Citation & DOI
+
+If you use MUSE in your work, please cite:
+
+Chua M., Vishnupriya K., Lee K. (2025). *MUSE: Multi-block Utility for Safe & Explainable Learning*. Zenodo. DOI: [10.5281/zenodo.17793183](https://doi.org/10.5281/zenodo.17793183)
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17793183.svg)](https://doi.org/10.5281/zenodo.17793183)
+
+
 # Project structure
 
 ```text
