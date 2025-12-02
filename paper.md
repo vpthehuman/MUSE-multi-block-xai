@@ -36,7 +36,7 @@ MUSE is implemented in Python and built on standard scientific-Python libraries 
 
 Internally, MUSE keeps a feature_to_block mapping so all outputs reference original block provenance. The default estimator is a Random Forest with class_weight="balanced" and multi-core training — a conservative choice that handles heterogeneous features and missingness robustly. Users can supply any estimator implementing the scikit-learn interface (e.g., logistic regression, gradient boosting, neural networks wrapped as sklearn estimators).
 
-Figure 1 (file: figures/architecture.png) illustrates the pipeline: block ingestion → deterministic concatenation → estimator training → SHAP explainability → block aggregation → model card generation.
+Figure 1 (file: model_architecture.png) illustrates the pipeline: block ingestion → deterministic concatenation → estimator training → SHAP explainability → block aggregation → model card generation.
 
 # Example usage
 
