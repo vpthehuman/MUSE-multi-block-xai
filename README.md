@@ -60,6 +60,18 @@ card = muse.generate_model_card(
 
 
 ```
+## Quick demo (fast, synthetic data)
+
+We provide a tiny synthetic dataset and a convenience script so users can run the three example demos quickly without downloading large public datasets. Create the synthetic data and run the demos:
+```bash
+# install dependencies first (preferably in venv)
+pip install -e .
+pip install -r requirements-dev.txt  # if you provide dev deps (pytest, nbconvert)
+
+# generate toy data and run quick demos
+python scripts/make_sample_data.py
+./run_quick_demo.sh
+```
 
 # Example notebooks
 The examples/ folder contains python templates that reproduce the main use-cases
