@@ -2,9 +2,11 @@ name: JOSS draft PDF
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -21,30 +23,14 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install system deps (texlive)
+      - name: Install texlive (needed for PDF)
         run: |
           sudo apt-get update -y
           sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-latex-extra lmodern
 
-      - name: Install python deps (pandoc filters)
-        run: |
-          python -m pip install --upgrade pip
-          pip install pandocfilters pyyaml
-
-      - name: Build JOSS draft (openjournals action)
-        uses: openjournals/openjournals-draft-action@v1
+      - name: Build draft PDF
+        uses: openjournals/openjournals-draft-action@main
         with:
+          journal: joss
           paper: paper/paper.md
           bib: paper/paper.bib
-          # Optional outputs: outdir etc.
-          outdir: artifacts
-
-      - name: Show artifacts folder
-        run: ls -la artifacts || true
-
-      - name: Upload PDF artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: joss-paper-pdf
-          path: artifacts/*.pdf
