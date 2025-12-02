@@ -1,30 +1,15 @@
 ---
 title: "MUSE: Multi-block Utility for Safe & Explainable Learning"
-tags:
-  - machine learning
-  - explainable AI
-  - biomedical informatics
-  - multi-omics
-  - radiomics
 authors:
   - name: Matthew Chua
-    affiliation: 1
+    affiliation: "1"
   - name: Vishnupriya Kannan
-    orcid: 0009-0007-1326-4549
-    affiliation: 1
+    affiliation: "1"
   - name: Khanh Lee
-    affiliation: 1
-affiliations:
-  - name: National University of Singapore, Singapore
-    index: 1
-date: 2025-11-25
+    affiliation: "1"
+date: 25 November 2025
+keywords: [machine learning, explainable AI, multi-omics, radiomics, biomedical informatics]
 bibliography: paper.bib
-tags:
-machine learning
-explainable AI
-biomedical informatics
-multi-omics
-radiomics
 ---
 
 # Summary
