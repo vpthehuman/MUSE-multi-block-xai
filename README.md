@@ -90,8 +90,9 @@ MUSE-multi-block-xai/
   LICENSE
   pyproject.toml
   model_architecture.png
-  paper.md
-  paper.bib
+  paper/
+    paper.md
+    paper.bib
 ```
 
 # License
