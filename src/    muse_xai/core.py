@@ -361,11 +361,28 @@ class MUSE:
 
         now_iso = datetime.utcnow().isoformat() + "Z"
 
+        # Collect accurate version info for main dependencies (use importlib.metadata)
+        try:
+            from importlib import metadata as importlib_metadata  # py3.8+
+        except Exception:
+            import importlib_metadata  # type: ignore
+
+        def _pkg_version(pkg_name: str) -> str:
+            try:
+                return importlib_metadata.version(pkg_name)
+            except Exception:
+                return "unknown"
+
+        # package name for this project on PyPI is 'muse-xai' (adjust if different)
         env_info = {
             "python_version": sys.version.split()[0],
             "platform": platform.platform(),
-            "sklearn_version": __import__("sklearn").__version__,
-            "shap_version": shap.__version__,
+            "muse_version": getattr(__import__("muse_xai"), "__version__", "0.0.0"),
+            "numpy_version": _pkg_version("numpy"),
+            "pandas_version": _pkg_version("pandas"),
+            "scikit_learn_version": _pkg_version("scikit-learn"),
+            "shap_version": _pkg_version("shap"),
+            "matplotlib_version": _pkg_version("matplotlib"),
         }
 
         # generic fallbacks
