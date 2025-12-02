@@ -94,6 +94,9 @@ MUSE-multi-block-xai/
     core.py
   tests/
     test_muse_synthetic.py
+  scripts/
+    make_sample_data.py
+    run_quick_demo.sh
   examples/
     wdbc_demo.py
     cbis_mass_demo.py
