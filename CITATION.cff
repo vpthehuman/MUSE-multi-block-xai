@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "MUSE: Multi-block Utility for Safe & Explainable Learning"
+version: "0.1.0"
+doi: "10.5281/zenodo.17793183"
+authors:
+  - family-names: Chua
+    given-names: Matthew
+    affiliation: "National University of Singapore"
+  - family-names: Kannan
+    given-names: Vishnupriya
+    orcid: "0009-0007-1326-4549"
+    affiliation: "National University of Singapore"
+  - family-names: Lee
+    given-names: Khanh
+    affiliation: "National University of Singapore"
+date-released: "2025-11-25"
+url: "https://github.com/vpthehuman/MUSE-multi-block-xai"
+license: "MIT"
+abstract: |
+  MUSE is a lightweight Python toolkit for building, explaining and documenting machine learning models on block-structured tabular biomedical data. It provides block-first data handling, SHAP-based feature and block importances, and automated model card generation.
+preferred-citation:
+  type: "bibtex"
+  text: |
+    @software{muse-xai-2025,
+      author = {Chua, Matthew and Kannan, Vishnupriya and Lee, Khanh},
+      title = {MUSE: Multi-block Utility for Safe & Explainable Learning},
+      version = {0.1.0},
+      year = {2025},
+      url = {https://github.com/vpthehuman/MUSE-multi-block-xai},
+      doi = {10.5281/zenodo.17793183}
+    }
