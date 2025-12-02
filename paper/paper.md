@@ -66,12 +66,16 @@ We validated MUSE across the included examples. On WDBC (569 samples, three logi
 
 MUSE includes unit tests that verify block alignment, feature→block mapping, SHAP aggregation correctness on synthetic ground-truth models, and model card serialization. Continuous integration runs the test suite on supported Python versions (3.9–3.12). Example notebooks serve as end-to-end regression checks. The project follows best practices for scientific software packaging and documentation [@Smith2018].
 
-# Software Availability 
-1. Repository: https://github.com/vpthehuman/MUSE-multi-block-xai
-2. License: MIT (see LICENSE)
-3. Installation: pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git (or from PyPI when published)
-4. Dependencies: scikit-learn, pandas, numpy, shap, matplotlib (optional)
-5. Notebooks & tests: examples/ and tests/ in the repository. A release archived via Zenodo will provide a DOI for citation.
+# Software availability
+
+- Repository: https://github.com/vpthehuman/MUSE-multi-block-xai (archived release)
+- Release (Zenodo DOI): 10.5281/zenodo.17793183
+- CITATION file: `CITATION.cff` at repository root.
+- License: MIT (see `LICENSE`)
+- Installation: `pip install git+https://github.com/vpthehuman/MUSE-multi-block-xai.git` or install the archived release via DOI.
+- Supported Python versions: 3.9 — 3.12
+- Dependencies: See `requirements/requirements.txt` for core runtime dependencies and `requirements/requirements-dev.txt` for development and testing.
+- Reproducibility: Example notebooks and the `run_quick_demo.sh` script include `random_state=42` seeds. Each generated model card includes exact environment versions (python, numpy, pandas, scikit-learn, shap, matplotlib) and the package version for reproducibility.
 
 Reproducibility: All example notebooks fix deterministic seeds (random_state=42 throughout), use explicit train/test splits, and record complete dependency version numbers in the auto-generated model card (Python version, library versions, estimator parameters). Instructions to rerun all examples are provided in the repository README.md and in each notebook, ensuring that reviewers and users can reproduce results identically.
 
