@@ -1,1 +1,38 @@
+name: JOSS draft PDF
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install system deps (texlive for PDF)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-latex-extra lmodern
+
+      - name: Run openjournals draft action
+        uses: openjournals/openjournals-draft-action@v1
+        with:
+          paper-path: paper/paper.md
+          bib-path: paper/paper.bib
+          out-dir: artifacts
+        # no token input required for public repos; if you want private artifact uploads, add GITHUB_TOKEN
 
