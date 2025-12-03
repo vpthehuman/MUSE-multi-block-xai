@@ -53,45 +53,48 @@ jobs:
           echo "---- pip list (top) ----"
           pip list | sed -n '1,200p'
 
-      - name: Verify import and MUSE symbol
+      - name: Create verify_import.py (safe printf, no heredoc)
         run: |
-          cat > verify_import.py <<'PY'
-import importlib.util, importlib, sys, pathlib, traceback
+          printf '%s\n' \
+            'import importlib.util, importlib, sys, pathlib, traceback' \
+            '' \
+            'print("Python executable:", sys.executable)' \
+            'print("sys.path (first 10):")' \
+            'for p in sys.path[:10]:' \
+            '    print("  ", p)' \
+            '' \
+            'spec = importlib.util.find_spec("muse_xai")' \
+            'print("find_spec(\\'muse_xai\\') ->", spec)' \
+            '' \
+            'if not spec:' \
+            '    print("ERROR: muse_xai not found. Listing src/muse_xai files (if any):")' \
+            '    p = pathlib.Path("src") / "muse_xai"' \
+            '    if p.exists():' \
+            '        for f in sorted(p.iterdir()):' \
+            '            print(" -", f)' \
+            '    else:' \
+            '        print(" src/muse_xai does not exist")' \
+            '    raise SystemExit(1)' \
+            '' \
+            'try:' \
+            '    m = importlib.import_module("muse_xai")' \
+            '    print("Imported muse_xai from:", getattr(m, "__file__", None))' \
+            '    try:' \
+            '        from muse_xai import MUSE' \
+            '        print("MUSE imported:", MUSE)' \
+            '    except Exception as e:' \
+            '        print("Failed to import MUSE from muse_xai:", e)' \
+            '        traceback.print_exc()' \
+            '        raise' \
+            'except Exception:' \
+            '    traceback.print_exc()' \
+            '    raise' \
+            > verify_import.py
+          echo "Wrote verify_import.py:"
+          sed -n '1,200p' verify_import.py
 
-print("Python executable:", sys.executable)
-print("sys.path (first 10):")
-for p in sys.path[:10]:
-    print("  ", p)
-
-spec = importlib.util.find_spec("muse_xai")
-print("find_spec('muse_xai') ->", spec)
-
-if not spec:
-    print("ERROR: muse_xai not found. Listing src/muse_xai files (if any):")
-    p = pathlib.Path("src") / "muse_xai"
-    if p.exists():
-        for f in sorted(p.iterdir()):
-            print(" -", f)
-    else:
-        print(" src/muse_xai does not exist")
-    raise SystemExit(1)
-
-try:
-    m = importlib.import_module("muse_xai")
-    print("Imported muse_xai from:", getattr(m, "__file__", None))
-    # try symbol
-    try:
-        from muse_xai import MUSE
-        print("MUSE imported:", MUSE)
-    except Exception as e:
-        print("Failed to import MUSE from muse_xai:", e)
-        traceback.print_exc()
-        raise
-except Exception:
-    traceback.print_exc()
-    raise
-PY
-          python verify_import.py
+      - name: Run verify_import.py
+        run: python verify_import.py
 
       - name: Run pytest
         run: pytest -q
