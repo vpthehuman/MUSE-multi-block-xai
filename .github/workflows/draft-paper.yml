@@ -24,7 +24,9 @@ jobs:
       - name: Install texlive (needed for PDF)
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-latex-extra lmodern
+          sudo apt-get install -y \
+            texlive-xetex texlive-fonts-recommended texlive-latex-extra lmodern \
+            texlive-bibtex-extra texlive-biblatex biber
 
       - name: Build draft PDF
         uses: openjournals/openjournals-draft-action@v1.0
