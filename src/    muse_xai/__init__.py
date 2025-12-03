@@ -1,3 +1,6 @@
+# expose the main API symbol expected by tests
+from .core import MUSE  # noqa: F401
+
 __all__ = ["MUSE"]
 __version__ = "0.1.0"
 git add src/muse_xai/__init__.py
