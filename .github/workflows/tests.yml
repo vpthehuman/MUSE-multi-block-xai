@@ -14,7 +14,7 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -64,32 +64,46 @@ jobs:
           echo "---- pip list (top) ----"
           pip list | sed -n '1,200p'
 
-      - name: Quick import probe (fail fast if broken)
+      - name: Create verify_import.py (safe printf)
         run: |
-          python - <<'PY'
-import importlib.util, importlib, sys, traceback
-print("Python:", sys.version)
-print("sys.path (first entries):")
-for p in sys.path[:12]:
-    print("  ", p)
-spec = importlib.util.find_spec("muse_xai")
-print("find_spec('muse_xai') ->", spec)
-if not spec:
-    raise SystemExit("muse_xai not found (find_spec returned None)")
-try:
-    import muse_xai
-    print("muse_xai imported from:", getattr(muse_xai, "__file__", None))
-    try:
-        from muse_xai import MUSE
-        print("MUSE symbol imported:", MUSE)
-    except Exception as e:
-        print("Failed importing MUSE symbol:", e)
-        traceback.print_exc()
-        raise SystemExit("MUSE import failed")
-except Exception:
-    traceback.print_exc()
-    raise SystemExit(1)
-PY
+          printf '%s\n' "import importlib.util, importlib, sys, traceback, pathlib" > verify_import.py
+          printf '%s\n' "" >> verify_import.py
+          printf '%s\n' "print('Python executable:', sys.executable)" >> verify_import.py
+          printf '%s\n' "print('sys.path (first 12):')" >> verify_import.py
+          printf '%s\n' "for p in sys.path[:12]:" >> verify_import.py
+          printf '%s\n' "    print('  ', p)" >> verify_import.py
+          printf '%s\n' "" >> verify_import.py
+          printf '%s\n' "spec = importlib.util.find_spec('muse_xai')" >> verify_import.py
+          printf '%s\n' "print(\"find_spec('muse_xai') ->\", spec)" >> verify_import.py
+          printf '%s\n' "" >> verify_import.py
+          printf '%s\n' "if not spec:" >> verify_import.py
+          printf '%s\n' "    print('ERROR: muse_xai not found. Listing src/muse_xai files (if any):')" >> verify_import.py
+          printf '%s\n' "    p = pathlib.Path('src') / 'muse_xai'" >> verify_import.py
+          printf '%s\n' "    if p.exists():" >> verify_import.py
+          printf '%s\n' "        for f in sorted(p.iterdir()):" >> verify_import.py
+          printf '%s\n' "            print(' -', f)" >> verify_import.py
+          printf '%s\n' "    else:" >> verify_import.py
+          printf '%s\n' "        print(' src/muse_xai does not exist')" >> verify_import.py
+          printf '%s\n' "    raise SystemExit(1)" >> verify_import.py
+          printf '%s\n' "" >> verify_import.py
+          printf '%s\n' "try:" >> verify_import.py
+          printf '%s\n' "    m = importlib.import_module('muse_xai')" >> verify_import.py
+          printf '%s\n' "    print('Imported muse_xai from:', getattr(m, '__file__', None))" >> verify_import.py
+          printf '%s\n' "    try:" >> verify_import.py
+          printf '%s\n' "        from muse_xai import MUSE" >> verify_import.py
+          printf '%s\n' "        print('MUSE symbol imported:', MUSE)" >> verify_import.py
+          printf '%s\n' "    except Exception as e:" >> verify_import.py
+          printf '%s\n' "        print('Failed importing MUSE symbol:', e)" >> verify_import.py
+          printf '%s\n' "        traceback.print_exc()" >> verify_import.py
+          printf '%s\n' "        raise" >> verify_import.py
+          printf '%s\n' "except Exception:" >> verify_import.py
+          printf '%s\n' "    traceback.print_exc()" >> verify_import.py
+          printf '%s\n' "    raise" >> verify_import.py
+          echo "Wrote verify_import.py:"
+          sed -n '1,240p' verify_import.py
+
+      - name: Run verify_import.py
+        run: python verify_import.py
 
       - name: Run pytest
         run: pytest -q
