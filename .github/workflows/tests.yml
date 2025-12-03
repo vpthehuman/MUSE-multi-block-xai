@@ -9,12 +9,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      # make src/ importable even if packaging is misconfigured
+      PYTHONPATH: src
     strategy:
       matrix:
         python-version: [ "3.10", "3.11", "3.12" ]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -37,8 +41,61 @@ jobs:
             pip install -r requirements/requirements-dev.txt
           fi
 
-      - name: Install package (editable)
-        run: pip install -e .
+      - name: Debug: python & paths
+        run: |
+          python -V
+          python -c "import sys; print('sys.executable:', sys.executable)"
+          python -c "import sys; print('PYTHONPATH env:', os.environ.get('PYTHONPATH', ''))" || true
+          python - <<'PY'
+import os, sys
+print("sys.path:")
+for p in sys.path:
+    print("  ", p)
+print("\nListing repo root:")
+import subprocess, pathlib, textwrap
+p = pathlib.Path.cwd()
+for item in sorted(p.iterdir()):
+    print(" -", item.name)
+print("\nListing src/ (if present):")
+try:
+    for item in sorted((p/'src').iterdir()):
+        print(" *", item.name)
+except Exception as e:
+    print(" src/ not present or empty:", e)
+PY
+
+      - name: Optionally install package (editable) if packaging metadata present
+        run: |
+          if [ -f "pyproject.toml" ] || [ -f "setup.cfg" ] || [ -f "setup.py" ]; then
+            echo "Found packaging metadata, attempting pip install -e ."
+            pip install -e .
+          else
+            echo "No pyproject.toml / setup.cfg / setup.py found — skipping editable install (PYTHONPATH=src will allow imports)"
+          fi
+        # don't fail the job here if install fails; the debug steps will show why
+        continue-on-error: false
+
+      - name: Show installed packages + probe muse_xai
+        run: |
+          echo "---- pip list (top 200) ----"
+          pip list | sed -n '1,200p'
+          echo
+          echo "---- try to find muse_xai spec ----"
+          python - <<'PY'
+import importlib.util, pprint
+spec = importlib.util.find_spec("muse_xai")
+print("find_spec('muse_xai') =>", spec)
+if spec:
+    try:
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        print("import succeeded; module file:", getattr(m, "__file__", None))
+    except Exception as e:
+        print("import failed at exec_module:", e)
+else:
+    print("muse_xai not found by find_spec")
+PY
 
       - name: Run pytest
-        run: pytest -q
+        run: |
+          pytest -q
