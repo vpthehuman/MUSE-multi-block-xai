@@ -16,19 +16,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Python (needed for some tools)
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      # Install a stable pandoc release (reliable --citeproc)
-      - name: Setup pandoc (stable)
+      - name: Setup pandoc (stable) using r-lib action
         uses: r-lib/actions/setup-pandoc@v2
         with:
-          pandoc-version: "3.1.5"
+          pandoc-version: "3.1.5"  # you can change this to a newer version if desired
 
-      # Install TeX tooling and biber + latexmk
-      - name: Install TeX (latexmk, biber, needed packages)
+      - name: Install texlive and biber (minimal)
         run: |
           sudo apt-get update -y
           sudo apt-get install -y \
@@ -37,85 +35,33 @@ jobs:
             texlive-latex-extra \
             texlive-bibtex-extra \
             biber \
-            lmodern \
-            latexmk
+            lmodern
 
-      - name: Show tool versions (diagnostic)
+      - name: Show pandoc and biber versions
         run: |
-          pandoc --version | head -n 1
+          pandoc --version | head -n 2
           pandoc --version
           biber --version || true
-          latexmk -v || true
 
-      # Convert markdown -> LaTeX using pandoc with cite processing
-      - name: Pandoc: convert paper.md -> build/paper.tex (with --citeproc)
+      - name: Convert paper.md -> paper.tex with pandoc (diagnostic)
         run: |
-          set -euo pipefail
           mkdir -p build
-          echo "Running pandoc --citeproc to generate build/paper.tex"
-          pandoc \
-            --from=markdown \
-            --to=latex \
-            --standalone \
-            --citeproc \
-            --metadata=citation-package:biblatex \
-            --bibliography=paper/paper.bib \
-            paper/paper.md -o build/paper.tex
+          pandoc --from markdown \
+                 --to latex \
+                 --standalone \
+                 --citeproc \
+                 --metadata=citation-package:biblatex \
+                 --bibliography=paper/paper.bib \
+                 paper/paper.md -o build/paper.tex || true
+          echo "---- snip: lines 360-420 of generated LaTeX ----"
+          sed -n '360,420p' build/paper.tex || true
 
-          echo "---- Showing lines 340-420 of build/paper.tex (inspect for raw \\citeproc) ----"
-          sed -n '340,420p' build/paper.tex || true
-
-          if grep -q -- '\\citeproc' build/paper.tex; then
-            echo "WARNING: raw \\citeproc tokens detected in build/paper.tex"
-            echo "Listing occurrences (line numbers):"
-            grep -n -- '\\citeproc' build/paper.tex || true
-          else
-            echo "No raw \\citeproc detected — pandoc expanded citations."
-          fi
-
-      # Fallback: if anything left with \citeproc, convert to \autocite (biblatex) to unblock compile
-      - name: Fallback replace: \\citeproc{...} -> \\autocite{...} (only if present)
-        if: always()
-        run: |
-          set -euo pipefail
-          if grep -q -- '\\citeproc' build/paper.tex; then
-            echo "Performing safe fallback substitution: \\citeproc{KEY} -> \\autocite{KEY}"
-            perl -0777 -pe "s/\\\\citeproc\{([^}]*)\}/\\\\autocite\{\$1\}/g" -i.build.bak build/paper.tex
-            echo "Replacement complete; show example lines (if any):"
-            grep -n -- '\\autocite' build/paper.tex || true
-          else
-            echo "No fallback replacement required."
-          fi
-
-      # Compile the produced LaTeX to PDF using latexmk (lualatex + biber)
-      - name: Compile build/paper.tex -> PDF (latexmk, lualatex + biber)
-        run: |
-          set -euo pipefail
-          cd build
-          echo "Running latexmk (lualatex + biber)..."
-          # Use lualatex as engine (matches runner's LuaHBTeX)
-          latexmk -pdf -pdflatex="lualatex %O %S" -use-make -f paper.tex || true
-
-          if [ ! -f "paper.pdf" ]; then
-            echo "latexmk failed; printing helpful logs for diagnosis:"
-            test -f paper.log && sed -n '1,300p' paper.log || true
-            test -f latexmk.log && sed -n '1,300p' latexmk.log || true
-            for f in *.blg; do echo "---- $f ----"; sed -n '1,200p' "$f"; done || true
-            echo "---- tail of paper.tex (last 120 lines) ----"
-            tail -n 120 paper.tex || true
-            exit 1
-          fi
-
-          # copy produced PDF to repository root (artifact upload step will pick it up)
-          cp paper.pdf ../paper.pdf
-          echo "PDF produced at ./paper.pdf"
-
-      # Clean auxiliary files (optional)
-      - name: Clean LaTeX auxiliary files
-        if: always()
-        run: |
-          cd build
-          latexmk -c || true
+      - name: Build draft PDF (openjournals action)
+        uses: openjournals/openjournals-draft-action@v1.0
+        with:
+          journal: joss
+          paper-path: paper/paper.md
+          args: "--bib paper/paper.bib --citeproc --metadata=citation-package:biblatex"
 
       - name: Upload PDF artifact
         if: always()
@@ -123,7 +69,6 @@ jobs:
         with:
           name: joss-paper
           path: |
-            ./paper.pdf
             **/*.pdf
             paper/*.pdf
             *.pdf
