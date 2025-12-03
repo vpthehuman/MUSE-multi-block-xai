@@ -31,10 +31,10 @@ jobs:
           ls -la
           echo
           echo "src/ tree:"
-          ls -la src || true
+          if [ -d "src" ]; then ls -la src; else echo "no src/"; fi
           echo
           echo "src/muse_xai:"
-          ls -la src/muse_xai || true
+          if [ -d "src/muse_xai" ]; then ls -la src/muse_xai; else echo "no src/muse_xai"; fi
 
       - name: Install runtime deps if any
         run: |
@@ -48,22 +48,23 @@ jobs:
       - name: Install package (editable)
         run: |
           pip install -e .
-          echo "---- pip show ----"
+          echo "---- pip show muse-xai (if installed) ----"
           pip show muse-xai || true
+          echo "---- pip list (top) ----"
           pip list | sed -n '1,200p'
 
       - name: Verify import and MUSE symbol
         run: |
           python - <<'PY'
 import importlib.util, importlib, sys, pathlib, traceback
-print("Python:", sys.executable)
+print("Python executable:", sys.executable)
 print("sys.path (first 10):")
 for p in sys.path[:10]:
-    print(" ", p)
+    print("  ", p)
 spec = importlib.util.find_spec("muse_xai")
 print("find_spec('muse_xai') ->", spec)
 if not spec:
-    print("ERROR: muse_xai not found. Listing src/muse_xai files:")
+    print("ERROR: muse_xai not found. Listing src/muse_xai files (if any):")
     p = pathlib.Path("src") / "muse_xai"
     if p.exists():
         for f in sorted(p.iterdir()):
@@ -74,12 +75,11 @@ if not spec:
 try:
     m = importlib.import_module("muse_xai")
     print("Imported muse_xai from:", getattr(m,"__file__", None))
-    # try symbol
     try:
         from muse_xai import MUSE
         print("MUSE imported:", MUSE)
     except Exception as e:
-        print("Failed to import MUSE:", e)
+        print("Failed to import MUSE from muse_xai:", e)
         traceback.print_exc()
         raise
 except Exception:
