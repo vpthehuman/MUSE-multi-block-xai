@@ -7,9 +7,6 @@ name = "muse-xai"
 version = "0.1.0"
 description = "MUSE XAI package"
 readme = "README.md"
-authors = [
-  { name = "Your Name", email = "you@example.com" }
-]
 requires-python = ">=3.10"
 
 [tool.setuptools.packages.find]
