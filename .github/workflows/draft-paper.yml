@@ -21,11 +21,15 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install pandoc, texlive and biber (minimal)
+      - name: Setup pandoc (stable) using r-lib action
+        uses: r-lib/actions/setup-pandoc@v2
+        with:
+          pandoc-version: "3.1.5"  # you can change this to a newer version if desired
+
+      - name: Install texlive and biber (minimal)
         run: |
           sudo apt-get update -y
-          # install pandoc (no pandoc-citeproc), latex packages and biber
-          sudo apt-get install -y pandoc \
+          sudo apt-get install -y \
             texlive-xetex \
             texlive-fonts-recommended \
             texlive-latex-extra \
