@@ -13,7 +13,7 @@ jobs:
       PYTHONPATH: src
     strategy:
       matrix:
-        python-version: [ "3.10", "3.11", "3.12" ]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
       - name: Checkout repo
@@ -24,26 +24,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Upgrade pip/setuptools/wheel
+      - name: Upgrade pip & build tools
         run: python -m pip install --upgrade pip setuptools wheel
-
-      - name: Show repo layout & key files
-        run: |
-          echo "---- repo root ----"
-          ls -la
-          echo
-          echo "---- pyproject.toml (first 200 lines) ----"
-          if [ -f pyproject.toml ]; then sed -n '1,200p' pyproject.toml; else echo "NO pyproject.toml"; fi
-          echo
-          echo "---- src/muse_xai files ----"
-          if [ -d src/muse_xai ]; then ls -la src/muse_xai; else echo "no src/muse_xai"; fi
-          echo
-          if [ -f src/muse_xai/__init__.py ]; then
-            echo "---- src/muse_xai/__init__.py ----"
-            sed -n '1,240p' src/muse_xai/__init__.py
-          else
-            echo "NO src/muse_xai/__init__.py"
-          fi
 
       - name: Install runtime deps (if present)
         run: |
@@ -51,7 +33,7 @@ jobs:
             pip install -r requirements/requirements.txt
           fi
 
-      - name: Install dev deps
+      - name: Install dev deps (if present)
         run: |
           if [ -f "requirements/requirements-dev.txt" ]; then
             pip install -r requirements/requirements-dev.txt
@@ -62,21 +44,7 @@ jobs:
       - name: Install package (editable)
         run: |
           pip install -e .
-          echo "---- pip show (muse-xai) ----"
           pip show muse-xai || true
-          echo "---- pip list (top) ----"
-          pip list | sed -n '1,200p'
 
-      - name: Quick import probe (single-line, YAML-safe)
-        run: python -c 'import importlib,sys,traceback,importlib.util; print("find_spec:", importlib.util.find_spec("muse_xai")); \
-try: \
-    m=importlib.import_module("muse_xai"); \
-    print("module_file:", getattr(m,"__file__", None)); \
-    from muse_xai import MUSE; \
-    print("MUSE OK"); \
-except Exception: \
-    traceback.print_exc(); \
-    sys.exit(1)'
-
-      - name: Run pytest
+      - name: Run tests
         run: pytest -q
