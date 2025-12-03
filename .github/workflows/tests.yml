@@ -32,14 +32,18 @@ jobs:
           echo "---- repo root ----"
           ls -la
           echo
-          echo "---- show pyproject.toml (if present) ----"
+          echo "---- pyproject.toml ----"
           if [ -f pyproject.toml ]; then sed -n '1,200p' pyproject.toml; else echo "NO pyproject.toml"; fi
           echo
-          echo "---- show src/muse_xai files ----"
+          echo "---- src/muse_xai ----"
           if [ -d src/muse_xai ]; then ls -la src/muse_xai; else echo "no src/muse_xai"; fi
           echo
-          echo "---- show src/muse_xai/__init__.py (if present) ----"
-          if [ -f src/muse_xai/__init__.py ]; then sed -n '1,240p' src/muse_xai/__init__.py; else echo "NO src/muse_xai/__init__.py"; fi
+          if [ -f src/muse_xai/__init__.py ]; then
+            echo "---- src/muse_xai/__init__.py ----"
+            sed -n '1,240p' src/muse_xai/__init__.py
+          else
+            echo "NO src/muse_xai/__init__.py"
+          fi
 
       - name: Install runtime deps (if present)
         run: |
@@ -64,7 +68,15 @@ jobs:
           pip list | sed -n '1,200p'
 
       - name: Quick import probe (will fail job if import fails)
-        run: python -c 'import importlib.util, importlib, sys, traceback; print("find_spec:", importlib.util.find_spec("muse_xai")); m = importlib.import_module("muse_xai"); print("module_file:", getattr(m,"__file__", None)); from muse_xai import MUSE; print("MUSE OK:", MUSE)'
+        run: |
+          python - <<'PY'
+import importlib.util, importlib, sys, traceback
+print("find_spec:", importlib.util.find_spec("muse_xai"))
+m = importlib.import_module("muse_xai")
+print("module_file:", getattr(m, "__file__", None))
+from muse_xai import MUSE
+print("MUSE imported OK:", MUSE)
+PY
 
       - name: Run pytest
         run: pytest -q
