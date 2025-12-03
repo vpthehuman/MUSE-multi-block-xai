@@ -114,7 +114,7 @@ MUSE-multi-block-xai/
     requirements.txt
     requirements-dev.txt
   workflows/
-    tests.yml
+    draft-paper.yml
   paper/
     paper.md
     paper.bib
