@@ -27,13 +27,13 @@ jobs:
 
       - name: Show repo tree (top)
         run: |
-          echo "Repo root files:"
+          echo "Repo root:"
           ls -la
           echo
           echo "src/ tree:"
           ls -la src || true
           echo
-          echo "src/muse_xai tree:"
+          echo "src/muse_xai:"
           ls -la src/muse_xai || true
 
       - name: Install runtime deps if any
@@ -43,49 +43,43 @@ jobs:
           fi
 
       - name: Install dev deps
-        run: |
-          pip install pytest
+        run: pip install pytest
 
-      - name: Install package (editable) and show result
+      - name: Install package (editable)
         run: |
           pip install -e .
-          echo
-          echo "---- pip show muse-xai ----"
-          pip show muse-xai || pip show muse-xai-0.1.0 || true
-          echo
-          echo "---- pip list top 200 ----"
+          echo "---- pip show ----"
+          pip show muse-xai || true
           pip list | sed -n '1,200p'
 
-      - name: Python import probe (will fail job if import fails)
+      - name: Verify import and MUSE symbol
         run: |
           python - <<'PY'
-import importlib, importlib.util, sys, traceback, pathlib
-print("Python executable:", sys.executable)
+import importlib.util, importlib, sys, pathlib, traceback
+print("Python:", sys.executable)
 print("sys.path (first 10):")
 for p in sys.path[:10]:
-    print("  ", p)
-print("\nFinding spec for muse_xai...")
+    print(" ", p)
 spec = importlib.util.find_spec("muse_xai")
-print("spec:", spec)
+print("find_spec('muse_xai') ->", spec)
 if not spec:
-    print("\nERROR: muse_xai not found by find_spec(). Listing src/muse_xai files:")
+    print("ERROR: muse_xai not found. Listing src/muse_xai files:")
     p = pathlib.Path("src") / "muse_xai"
     if p.exists():
-        for x in sorted(p.iterdir()):
-            print(" -", x.name)
+        for f in sorted(p.iterdir()):
+            print(" -", f)
     else:
-        print(" src/muse_xai does not exist!")
-    raise SystemExit("muse_xai not installed/importable")
-
+        print(" src/muse_xai does not exist")
+    raise SystemExit(1)
 try:
     m = importlib.import_module("muse_xai")
-    print("Imported muse_xai:", getattr(m, "__file__", None))
-    # try to import MUSE from package
+    print("Imported muse_xai from:", getattr(m,"__file__", None))
+    # try symbol
     try:
         from muse_xai import MUSE
-        print("Successfully imported MUSE:", MUSE)
+        print("MUSE imported:", MUSE)
     except Exception as e:
-        print("Failed to import MUSE from muse_xai:", e)
+        print("Failed to import MUSE:", e)
         traceback.print_exc()
         raise
 except Exception:
