@@ -1,19 +1,16 @@
-name: CI - tests
+name: CI - inspect (verbose)
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  test:
+  inspect:
     runs-on: ubuntu-latest
-    env:
-      PYTHONPATH: src
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10"]
 
     steps:
       - name: Checkout repo
@@ -27,48 +24,77 @@ jobs:
       - name: Upgrade pip/setuptools/wheel
         run: python -m pip install --upgrade pip setuptools wheel
 
-      - name: Show repo layout & key files
+      - name: Show repo files
         run: |
-          echo "---- repo root ----"
+          echo "=== repo root ==="
           ls -la
           echo
-          echo "---- pyproject.toml ----"
-          if [ -f pyproject.toml ]; then sed -n '1,200p' pyproject.toml; else echo "NO pyproject.toml"; fi
+          echo "=== pyproject.toml ==="
+          if [ -f pyproject.toml ]; then sed -n '1,240p' pyproject.toml; else echo "(no pyproject.toml)"; fi
           echo
-          echo "---- src/muse_xai ----"
-          if [ -d src/muse_xai ]; then ls -la src/muse_xai; else echo "no src/muse_xai"; fi
+          echo "=== src tree ==="
+          if [ -d src ]; then find src -maxdepth 3 -type f -print; else echo "(no src/)"; fi
           echo
-          if [ -f src/muse_xai/__init__.py ]; then
-            echo "---- src/muse_xai/__init__.py ----"
-            sed -n '1,240p' src/muse_xai/__init__.py
-          else
-            echo "NO src/muse_xai/__init__.py"
-          fi
+          echo "=== src/muse_xai/__init__.py ==="
+          if [ -f src/muse_xai/__init__.py ]; then sed -n '1,240p' src/muse_xai/__init__.py; else echo "(no src/muse_xai/__init__.py)"; fi
+          echo
+          echo "=== src/muse_xai/core.py (first 300 lines) ==="
+          if [ -f src/muse_xai/core.py ]; then sed -n '1,300p' src/muse_xai/core.py; else echo "(no core.py)"; fi
 
-      - name: Install runtime deps (if present)
+      - name: Install deps and package (capture)
         run: |
-          if [ -f "requirements/requirements.txt" ]; then
-            pip install -r requirements/requirements.txt
-          fi
+          set -o pipefail
+          # runtime + dev
+          if [ -f requirements/requirements.txt ]; then pip install -r requirements/requirements.txt 2>&1 | tee pip-install.log; fi
+          if [ -f requirements/requirements-dev.txt ]; then pip install -r requirements/requirements-dev.txt 2>&1 | tee -a pip-install.log; fi
+          # editable install, verbose
+          pip install -v -e . 2>&1 | tee pip-editable.log || true
 
-      - name: Install dev deps
+      - name: Verify import (capture)
         run: |
-          if [ -f "requirements/requirements-dev.txt" ]; then
-            pip install -r requirements/requirements-dev.txt
-          else
-            pip install pytest
-          fi
+          python - <<'PY' > verify_import.out 2>&1
+import importlib.util, importlib, sys, traceback, pathlib, pkgutil
+print("python:", sys.version)
+print("sys.path (first 12):")
+for p in sys.path[:12]:
+    print("  ", p)
+print("\nfind_spec:", importlib.util.find_spec("muse_xai"))
+print("\npkgutil.iter_modules in src/muse_xai (if exists):")
+p = pathlib.Path("src") / "muse_xai"
+if p.exists():
+    for m in pkgutil.iter_modules([str(p)]):
+        print("  module:", m)
+else:
+    print(" src/muse_xai not present")
+try:
+    m = importlib.import_module("muse_xai")
+    print("\nImported muse_xai from:", getattr(m, "__file__", None))
+    print("module dir listing:")
+    import os
+    print(os.listdir(os.path.dirname(getattr(m, "__file__"))))
+    try:
+        from muse_xai import MUSE
+        print("\nMUSE imported OK:", MUSE)
+    except Exception as e:
+        print("\nFailed to import MUSE symbol:", e)
+        traceback.print_exc()
+        raise
+except Exception as e:
+    print("\nImport error:")
+    traceback.print_exc()
+    raise
+PY
 
-      - name: Install package (editable)
+      - name: Run pytest (capture)
         run: |
-          pip install -e .
-          echo "---- pip show (muse-xai) ----"
-          pip show muse-xai || true
-          echo "---- pip list (top) ----"
-          pip list | sed -n '1,200p'
+          pytest -q > pytest.out 2>&1 || (echo "pytest failed" && cat pytest.out && false)
 
-      - name: Quick import probe (will fail job if import fails)
-        run: python -c 'import importlib.util, importlib, sys, traceback; print("find_spec:", importlib.util.find_spec("muse_xai")); m=importlib.import_module("muse_xai"); print("module_file:", getattr(m,"__file__", None)); from muse_xai import MUSE; print("MUSE OK:", MUSE)'
-
-      - name: Run pytest
-        run: pytest -q
+      - name: Upload logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-inspect-logs
+          path: |
+            pip-install.log
+            pip-editable.log
+            verify_import.out
+            pytest.out
