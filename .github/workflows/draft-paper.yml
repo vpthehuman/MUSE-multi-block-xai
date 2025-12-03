@@ -16,18 +16,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Python
+      - name: Setup Python (needed for some tools)
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      # Use r-lib action to install a stable recent pandoc
+      # Install a stable pandoc release (reliable --citeproc)
       - name: Setup pandoc (stable)
         uses: r-lib/actions/setup-pandoc@v2
         with:
           pandoc-version: "3.1.5"
 
-      - name: Install TeX, latexmk and biber
+      # Install TeX tooling and biber + latexmk
+      - name: Install TeX (latexmk, biber, needed packages)
         run: |
           sudo apt-get update -y
           sudo apt-get install -y \
@@ -39,17 +40,19 @@ jobs:
             lmodern \
             latexmk
 
-      - name: Show pandoc and biber versions (diagnostic)
+      - name: Show tool versions (diagnostic)
         run: |
           pandoc --version | head -n 1
           pandoc --version
           biber --version || true
+          latexmk -v || true
 
-      - name: Convert paper.md -> build/paper.tex with pandoc (force cite processing)
+      # Convert markdown -> LaTeX using pandoc with cite processing
+      - name: Pandoc: convert paper.md -> build/paper.tex (with --citeproc)
         run: |
           set -euo pipefail
           mkdir -p build
-          echo "Running pandoc --citeproc to produce build/paper.tex"
+          echo "Running pandoc --citeproc to generate build/paper.tex"
           pandoc \
             --from=markdown \
             --to=latex \
@@ -59,7 +62,7 @@ jobs:
             --bibliography=paper/paper.bib \
             paper/paper.md -o build/paper.tex
 
-          echo "---- show lines 340-420 of generated LaTeX to inspect for raw \\citeproc tokens ----"
+          echo "---- Showing lines 340-420 of build/paper.tex (inspect for raw \\citeproc) ----"
           sed -n '340,420p' build/paper.tex || true
 
           if grep -q -- '\\citeproc' build/paper.tex; then
@@ -67,32 +70,34 @@ jobs:
             echo "Listing occurrences (line numbers):"
             grep -n -- '\\citeproc' build/paper.tex || true
           else
-            echo "No \\citeproc tokens detected; citations were processed by pandoc."
+            echo "No raw \\citeproc detected — pandoc expanded citations."
           fi
 
-      - name: Fallback: replace raw \citeproc{...} -> \autocite{...} (only if present)
+      # Fallback: if anything left with \citeproc, convert to \autocite (biblatex) to unblock compile
+      - name: Fallback replace: \\citeproc{...} -> \\autocite{...} (only if present)
         if: always()
         run: |
           set -euo pipefail
           if grep -q -- '\\citeproc' build/paper.tex; then
-            echo "Performing fallback replacement: \\citeproc{KEY} -> \\autocite{KEY}"
-            # replace all \citeproc{...} occurrences with \autocite{...}
+            echo "Performing safe fallback substitution: \\citeproc{KEY} -> \\autocite{KEY}"
             perl -0777 -pe "s/\\\\citeproc\{([^}]*)\}/\\\\autocite\{\$1\}/g" -i.build.bak build/paper.tex
-            echo "Replacement done; showing replaced lines:"
+            echo "Replacement complete; show example lines (if any):"
             grep -n -- '\\autocite' build/paper.tex || true
           else
-            echo "No replacement needed."
+            echo "No fallback replacement required."
           fi
 
-      - name: Compile build/paper.tex -> PDF with latexmk (lualatex + biber)
+      # Compile the produced LaTeX to PDF using latexmk (lualatex + biber)
+      - name: Compile build/paper.tex -> PDF (latexmk, lualatex + biber)
         run: |
           set -euo pipefail
           cd build
-          echo "=== Running latexmk (lualatex + biber) ==="
+          echo "Running latexmk (lualatex + biber)..."
+          # Use lualatex as engine (matches runner's LuaHBTeX)
           latexmk -pdf -pdflatex="lualatex %O %S" -use-make -f paper.tex || true
 
           if [ ! -f "paper.pdf" ]; then
-            echo "latexmk failed — printing helpful logs for debugging:"
+            echo "latexmk failed; printing helpful logs for diagnosis:"
             test -f paper.log && sed -n '1,300p' paper.log || true
             test -f latexmk.log && sed -n '1,300p' latexmk.log || true
             for f in *.blg; do echo "---- $f ----"; sed -n '1,200p' "$f"; done || true
@@ -101,11 +106,12 @@ jobs:
             exit 1
           fi
 
-          # Copy the PDF to repo root so the Upload artifact step can find it
+          # copy produced PDF to repository root (artifact upload step will pick it up)
           cp paper.pdf ../paper.pdf
           echo "PDF produced at ./paper.pdf"
 
-      - name: Clean auxiliary LaTeX files (optional)
+      # Clean auxiliary files (optional)
+      - name: Clean LaTeX auxiliary files
         if: always()
         run: |
           cd build
