@@ -68,15 +68,7 @@ jobs:
           pip list | sed -n '1,200p'
 
       - name: Quick import probe (will fail job if import fails)
-        run: |
-          python - <<'PY'
-import importlib.util, importlib, sys, traceback
-print("find_spec:", importlib.util.find_spec("muse_xai"))
-m = importlib.import_module("muse_xai")
-print("module_file:", getattr(m, "__file__", None))
-from muse_xai import MUSE
-print("MUSE imported OK:", MUSE)
-PY
+        run: python -c 'import importlib.util, importlib, sys, traceback; print("find_spec:", importlib.util.find_spec("muse_xai")); m=importlib.import_module("muse_xai"); print("module_file:", getattr(m,"__file__", None)); from muse_xai import MUSE; print("MUSE OK:", MUSE)'
 
       - name: Run pytest
         run: pytest -q
