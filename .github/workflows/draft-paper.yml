@@ -21,9 +21,13 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install texlive (needed for PDF)
+      # Install pandoc (so we control the convert step) + texlive packages + biber
+      - name: Install pandoc, texlive, biber and helpers
         run: |
           sudo apt-get update -y
+          # pandoc + pandoc-citeproc (pandoc-citeproc is still useful for older pandoc/filters)
+          sudo apt-get install -y pandoc pandoc-citeproc
+          # minimal texlive useful packages (biber included)
           sudo apt-get install -y \
             texlive-xetex \
             texlive-fonts-recommended \
@@ -31,16 +35,43 @@ jobs:
             texlive-bibtex-extra \
             biber \
             lmodern
+          # (Optional fallback) If you prefer, switch to texlive-full (uncomment)
+          # sudo apt-get install -y texlive-full
 
-      - name: Build draft PDF
+      - name: Show pandoc and biber versions (diagnostic)
+        run: |
+          pandoc --version | head -n 2
+          pandoc --version
+          biber --version || true
+
+      # Convert the markdown to LaTeX locally with pandoc (this is a diagnostic + ensures citeproc runs)
+      - name: Convert paper.md -> paper.tex with pandoc (diagnostic)
+        run: |
+          mkdir -p build
+          # produce biblatex style LaTeX and run citation processing locally
+          pandoc \
+            --from markdown \
+            --to latex \
+            --standalone \
+            --citeproc \
+            --metadata=citation-package:biblatex \
+            --bibliography=paper/paper.bib \
+            paper/paper.md -o build/paper.tex
+
+          echo "---- snip: lines 380-410 of generated LaTeX (if present) ----"
+          # print lines around the typical error line to check for \citeproc tokens
+          sed -n '360,420p' build/paper.tex || true
+
+      # If the generated .tex still contains raw \citeproc, the sed output will show it.
+      # Next run the openjournals action (the action may itself run pandoc; passing args to ensure citeproc)
+      - name: Build draft PDF (openjournals action)
         uses: openjournals/openjournals-draft-action@v1.0
         with:
           journal: joss
           paper-path: paper/paper.md
-          # ensure pandoc does citation processing and outputs biblatex-compatible LaTeX
+          # force pandoc to produce biblatex-compatible output and run citation processing
           args: "--bib paper/paper.bib --citeproc --metadata=citation-package:biblatex"
 
-      # Upload any generated PDF(s) so you can download them from Actions > run > Artifacts
       - name: Upload PDF artifact
         if: always()
         uses: actions/upload-artifact@v4
