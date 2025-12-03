@@ -9,9 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      # make src/ importable even if packaging is misconfigured
-      PYTHONPATH: src
     strategy:
       matrix:
         python-version: [ "3.10", "3.11", "3.12" ]
@@ -25,10 +22,21 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
+      - name: Upgrade pip, setuptools, wheel
+        run: python -m pip install --upgrade pip setuptools wheel
 
-      - name: Install runtime deps
+      - name: Show repo tree (top)
+        run: |
+          echo "Repo root files:"
+          ls -la
+          echo
+          echo "src/ tree:"
+          ls -la src || true
+          echo
+          echo "src/muse_xai tree:"
+          ls -la src/muse_xai || true
+
+      - name: Install runtime deps if any
         run: |
           if [ -f "requirements/requirements.txt" ]; then
             pip install -r requirements/requirements.txt
@@ -37,65 +45,53 @@ jobs:
       - name: Install dev deps
         run: |
           pip install pytest
-          if [ -f "requirements/requirements-dev.txt" ]; then
-            pip install -r requirements/requirements-dev.txt
-          fi
 
-      - name: Debug: python & paths
+      - name: Install package (editable) and show result
         run: |
-          python -V
-          python -c "import sys; print('sys.executable:', sys.executable)"
-          python -c "import sys; print('PYTHONPATH env:', os.environ.get('PYTHONPATH', ''))" || true
-          python - <<'PY'
-import os, sys
-print("sys.path:")
-for p in sys.path:
-    print("  ", p)
-print("\nListing repo root:")
-import subprocess, pathlib, textwrap
-p = pathlib.Path.cwd()
-for item in sorted(p.iterdir()):
-    print(" -", item.name)
-print("\nListing src/ (if present):")
-try:
-    for item in sorted((p/'src').iterdir()):
-        print(" *", item.name)
-except Exception as e:
-    print(" src/ not present or empty:", e)
-PY
-
-      - name: Optionally install package (editable) if packaging metadata present
-        run: |
-          if [ -f "pyproject.toml" ] || [ -f "setup.cfg" ] || [ -f "setup.py" ]; then
-            echo "Found packaging metadata, attempting pip install -e ."
-            pip install -e .
-          else
-            echo "No pyproject.toml / setup.cfg / setup.py found — skipping editable install (PYTHONPATH=src will allow imports)"
-          fi
-        # don't fail the job here if install fails; the debug steps will show why
-        continue-on-error: false
-
-      - name: Show installed packages + probe muse_xai
-        run: |
-          echo "---- pip list (top 200) ----"
-          pip list | sed -n '1,200p'
+          pip install -e .
           echo
-          echo "---- try to find muse_xai spec ----"
+          echo "---- pip show muse-xai ----"
+          pip show muse-xai || pip show muse-xai-0.1.0 || true
+          echo
+          echo "---- pip list top 200 ----"
+          pip list | sed -n '1,200p'
+
+      - name: Python import probe (will fail job if import fails)
+        run: |
           python - <<'PY'
-import importlib.util, pprint
+import importlib, importlib.util, sys, traceback, pathlib
+print("Python executable:", sys.executable)
+print("sys.path (first 10):")
+for p in sys.path[:10]:
+    print("  ", p)
+print("\nFinding spec for muse_xai...")
 spec = importlib.util.find_spec("muse_xai")
-print("find_spec('muse_xai') =>", spec)
-if spec:
+print("spec:", spec)
+if not spec:
+    print("\nERROR: muse_xai not found by find_spec(). Listing src/muse_xai files:")
+    p = pathlib.Path("src") / "muse_xai"
+    if p.exists():
+        for x in sorted(p.iterdir()):
+            print(" -", x.name)
+    else:
+        print(" src/muse_xai does not exist!")
+    raise SystemExit("muse_xai not installed/importable")
+
+try:
+    m = importlib.import_module("muse_xai")
+    print("Imported muse_xai:", getattr(m, "__file__", None))
+    # try to import MUSE from package
     try:
-        m = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(m)
-        print("import succeeded; module file:", getattr(m, "__file__", None))
+        from muse_xai import MUSE
+        print("Successfully imported MUSE:", MUSE)
     except Exception as e:
-        print("import failed at exec_module:", e)
-else:
-    print("muse_xai not found by find_spec")
+        print("Failed to import MUSE from muse_xai:", e)
+        traceback.print_exc()
+        raise
+except Exception:
+    traceback.print_exc()
+    raise
 PY
 
       - name: Run pytest
-        run: |
-          pytest -q
+        run: pytest -q
