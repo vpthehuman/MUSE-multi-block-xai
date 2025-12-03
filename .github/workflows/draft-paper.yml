@@ -25,15 +25,20 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y \
-            texlive-xetex texlive-fonts-recommended texlive-latex-extra lmodern \
-            texlive-bibtex-extra texlive-biblatex biber
+            texlive-xetex \
+            texlive-fonts-recommended \
+            texlive-latex-extra \
+            texlive-bibtex-extra \
+            biber \
+            lmodern
 
       - name: Build draft PDF
         uses: openjournals/openjournals-draft-action@v1.0
         with:
           journal: joss
-          paper-path: paper/paper.md         # <-- correct input name and path
-          args: "--bib paper/paper.bib"      # <-- pass bib via args
+          paper-path: paper/paper.md
+          # ensure pandoc does citation processing and outputs biblatex-compatible LaTeX
+          args: "--bib paper/paper.bib --citeproc --metadata=citation-package:biblatex"
 
       # Upload any generated PDF(s) so you can download them from Actions > run > Artifacts
       - name: Upload PDF artifact
