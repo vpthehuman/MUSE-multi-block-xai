@@ -24,6 +24,9 @@ affiliations:
     index: 1
   - name: Lee Kong Chian School of Medicine, Nanyang Technological University, Singapore
     index: 2
+
+---
+
 # Summary
 
 MUSE (Multi-block Utility for Safe & Explainable Learning) is an open-source Python toolkit that simplifies building, explaining, and documenting supervised models on block-structured tabular biomedical data. In many biomedical studies different sources of information (demographics, clinical labs, multi-omics assays, imaging/radiomics) are naturally grouped into modality blocks. Standard ML workflows flatten these blocks into a single table, making it hard to track which modality drives model decisions — a crucial shortcoming for clinical interpretation, validation and regulatory review.
